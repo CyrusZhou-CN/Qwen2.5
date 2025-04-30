@@ -37,10 +37,10 @@ The highlights from Qwen3 include:
 - **Expertise in agent capabilities**, enabling precise integration with external tools in both thinking and unthinking modes and achieving leading performance among open-source models in complex agent-based tasks.
 - **Support of 100+ languages and dialects** with strong capabilities for **multilingual instruction following** and **translation**.
 
-> ![IMPORTANT]
+> [!IMPORTANT]
 > Qwen3 models adopt a different naming scheme.
 >
-> The post-trained models do not use the "-Instruct" suffix any more. For example, Qwen3-32B is the newer version of Qwen2.5-32B-Instruct.
+> The post-trained models do not use the "-Instruct" suffix anymore. For example, Qwen3-32B is the newer version of Qwen2.5-32B-Instruct.
 >
 > The base models now have names ending with "-Base".
 
@@ -55,9 +55,9 @@ The highlights from Qwen3 include:
 
 ## Performance
 
-Detailed evaluation results are reported in this <a href="https://qwenlm.github.io/blog/qwen3/"> 📑 blog</a>.
+Detailed evaluation results are reported in this [📑 blog](https://qwenlm.github.io/blog/qwen3/).
 
-For requirements on GPU memory and the respective throughput, see results [here](https://qwen.readthedocs.io/en/latest/getting_started/speed_benchmark.html) .
+For requirements on GPU memory and the respective throughput, see results [here](https://qwen.readthedocs.io/en/latest/getting_started/speed_benchmark.html).
 
 ## Run Qwen3
 
@@ -104,7 +104,7 @@ print(tokenizer.decode(output_ids, skip_special_tokens=True))
 ```
 
 By default, Qwen3 models will think before response.
-This could be controled by
+This could be controlled by
 - `enable_thinking=False`: Passing `enable_thinking=False` to `tokenizer.apply_chat_template` will strictly prevent the model from generating thinking content.
 - `/think` and `/nothink` instructions: Use those words in the system or user message to signify whether Qwen3 should think. In multi-turn conversations, the latest instruction is followed.
 
@@ -136,9 +136,22 @@ A simple web front end will be at `http://localhost:8080` and an OpenAI-compatib
 
 For additional guides, please refer to [our documentation](https://qwen.readthedocs.io/en/latest/run_locally/llama.cpp.html).
 
+> [!TIP]
+> llama.cpp adopts "rotating context management" and infinite generation is made possible by evicting earlier tokens.
+> It could configured by parameters and the commands above effectively disable it.
+> For more details, please refer to [our documentation](https://qwen.readthedocs.io/en/latest/run_locally/llama.cpp.html#llama-cli).
+
+> [!IMPORTANT]
+> The chat template uses features that are not supported by the template engine used by llama.cpp.
+> As a result, you may encounter the following errors if the original chat template is used:
+> ```
+> common_chat_templates_init: failed to parse chat template (defaulting to chatml)
+> ```
+> We are working on a proper fix.
+
 ### Ollama
 
-After [installing ollama](https://ollama.com/), you can initiate the ollama service with the following command:
+After [installing Ollama](https://ollama.com/), you can initiate the Ollama service with the following command (Ollama v0.6.6 or higher is required):
 ```shell
 ollama serve
 # You need to keep this service running whenever you are using ollama
@@ -147,23 +160,30 @@ ollama serve
 To pull a model checkpoint and run the model, use the `ollama run` command. You can specify a model size by adding a suffix to `qwen3`, such as `:8b` or `:30b-a3b`:
 ```shell
 ollama run qwen3:8b
+# Setting parameters, type "/set parameter num_ctx 40960" and "/set parameter num_predict 32768"
 # To exit, type "/bye" and press ENTER
 ```
 
-You can also access the ollama service via its OpenAI-compatible API. 
+You can also access the Ollama service via its OpenAI-compatible API. 
 Please note that you need to (1) keep `ollama serve` running while using the API, and (2) execute `ollama run qwen3:8b` before utilizing this API to ensure that the model checkpoint is prepared.
 The API is at `http://localhost:11434/v1/` by default.
 
 For additional details, please visit [ollama.ai](https://ollama.com/).
 
+> [!TIP]
+> Ollama adopts the same "rotating context management" with llama.cpp.
+> However, its default settings (`num_ctx` 2048 and `num_predict` -1), suggesting infinite generation with a 2048-token context,
+> could lead to trouble for Qwen3 models.
+> We recommend setting `num_ctx` and `num_predict` properly.
+
 ### LMStudio
 
 Qwen3 has already been supported by [lmstudio.ai](https://lmstudio.ai/). You can directly use LMStudio with our GGUF files.
 
-### MLX-LM
+### MLX LM
 
 If you are running on Apple Silicon, [`mlx-lm`](https://github.com/ml-explore/mlx-lm) also supports Qwen3 (`mlx-lm>=0.24.0`). 
-Look for models ending with MLX on HuggingFace Hub.
+Look for models ending with MLX on Hugging Face Hub.
 
 
 <!-- ### OpenVINO
@@ -201,16 +221,16 @@ An OpenAI-compatible API will be available at `http://localhost:30000/v1`.
 ### vLLM
 
 [vLLM](https://github.com/vllm-project/vllm) is a high-throughput and memory-efficient inference and serving engine for LLMs.
-`vllm>=0.8.4` is required.
+`vllm>=0.8.5` is recommended.
 
 ```shell
-vllm serve Qwen/Qwen3-8B --port 8000 --enable-reasoning-parser --reasoning-parser deepseek_r1
+vllm serve Qwen/Qwen3-8B --port 8000 --enable-reasoning --reasoning-parser deepseek_r1
 ```
 An OpenAI-compatible API will be available at `http://localhost:8000/v1`.
 
 ### MindIE
 
-For depolyment on Ascend NPUs, please visit [Modelers](https://modelers.cn/) and search for Qwen3.
+For deployment on Ascend NPUs, please visit [Modelers](https://modelers.cn/) and search for Qwen3.
 
 <!-- 
 ### OpenLLM
@@ -229,13 +249,13 @@ The server is active at `http://localhost:3000/`, providing OpenAI-compatible AP
 ### Tool Use
 
 For tool use capabilities, we recommend taking a look at [Qwen-Agent](https://github.com/QwenLM/Qwen-Agent), which provides a wrapper around these APIs to support tool use or function calling with MCP support.
-Tool use with Qwen3 can also be conducted with SGLang, vLLM,  Transformers, llama.cpp, Ollama, etc.
+Tool use with Qwen3 can also be conducted with SGLang, vLLM, Transformers, llama.cpp, Ollama, etc.
 Follow guides in our documentation to see how to enable the support.
 
 
 ### Finetuning
 
-We advise you to use training frameworks, including [Axolotl](https://github.com/OpenAccess-AI-Collective/axolotl), [unsloth](https://github.com/unslothai/unsloth), [Swift](https://github.com/modelscope/swift), [Llama-Factory](https://github.com/hiyouga/LLaMA-Factory), etc., to finetune your models with SFT, DPO, GRPO, etc.
+We advise you to use training frameworks, including [Axolotl](https://github.com/OpenAccess-AI-Collective/axolotl), [UnSloth](https://github.com/unslothai/unsloth), [Swift](https://github.com/modelscope/swift), [Llama-Factory](https://github.com/hiyouga/LLaMA-Factory), etc., to finetune your models with SFT, DPO, GRPO, etc.
 
 
 ## License Agreement
@@ -247,7 +267,7 @@ You can find the license files in the respective Hugging Face repositories.
 
 If you find our work helpful, feel free to give us a cite.
 
-```
+```bibtex
 @article{qwen2.5,
     title   = {Qwen2.5 Technical Report}, 
     author  = {An Yang and Baosong Yang and Beichen Zhang and Binyuan Hui and Bo Zheng and Bowen Yu and Chengyuan Li and Dayiheng Liu and Fei Huang and Haoran Wei and Huan Lin and Jian Yang and Jianhong Tu and Jianwei Zhang and Jianxin Yang and Jiaxi Yang and Jingren Zhou and Junyang Lin and Kai Dang and Keming Lu and Keqin Bao and Kexin Yang and Le Yu and Mei Li and Mingfeng Xue and Pei Zhang and Qin Zhu and Rui Men and Runji Lin and Tianhao Li and Tingyu Xia and Xingzhang Ren and Xuancheng Ren and Yang Fan and Yang Su and Yichang Zhang and Yu Wan and Yuqiong Liu and Zeyu Cui and Zhenru Zhang and Zihan Qiu},
